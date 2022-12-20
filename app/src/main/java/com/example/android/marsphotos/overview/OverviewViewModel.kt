@@ -21,25 +21,34 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.android.marsphotos.network.MarsApi
-import com.squareup.moshi.Moshi
+import com.example.android.marsphotos.network.MarsPhoto
 import kotlinx.coroutines.launch
-import okio.utf8Size
 
 /**
  * The [ViewModel] that is attached to the [OverviewFragment].
  */
 class OverviewViewModel : ViewModel() {
 
+    // variable to define the span count of the grid layout
+    private val _spanCount = MutableLiveData<Int>(2)
+    val spanCount: LiveData<Int> = _spanCount
+
     // The internal MutableLiveData that stores the status of the most recent request
     private val _status = MutableLiveData<String>()
+    // internal MutableLiveData that stores fetched photos
+    private val _photos = MutableLiveData<List<MarsPhoto>>()
 
-    // The external immutable LiveData for the request status
+    // The external immutable LiveData for:
+    //   the request status
     val status: LiveData<String> = _status
+    //   the photos
+    val photos: LiveData<List<MarsPhoto>> = _photos
 
     /**
      * Call getMarsPhotos() on init so we can display status immediately.
      */
     init {
+        toggleSpanCount()
         getMarsPhotos()
     }
 
@@ -51,11 +60,19 @@ class OverviewViewModel : ViewModel() {
         viewModelScope.launch {
             try {
 
-                val listResult = MarsApi.retrofitService.getPhotos()
-                _status.value = "Success: ${listResult.size} Mars photos retrieved"
+                _photos.value = MarsApi.retrofitService.getPhotos()
+                _status.value = "Success: Mars properties retrieved"
             } catch (e: Exception) {
                 _status.value = "${e.javaClass}\n${e.localizedMessage}"
             }
+        }
+    }
+
+    // toggles the span count of the grid layout between 2 and 3
+    fun toggleSpanCount() {
+        _spanCount.value = when(_spanCount.value) {
+            2 -> 3
+            else -> 2
         }
     }
 }
