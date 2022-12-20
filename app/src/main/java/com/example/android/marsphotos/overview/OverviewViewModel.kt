@@ -48,8 +48,8 @@ class OverviewViewModel : ViewModel() {
      * Call getMarsPhotos() on init so we can display status immediately.
      */
     init {
-        toggleSpanCount()
         getMarsPhotos()
+        toggleSpanCount()
     }
 
     /**
@@ -64,6 +64,7 @@ class OverviewViewModel : ViewModel() {
                 _status.value = "Success: Mars properties retrieved"
             } catch (e: Exception) {
                 _status.value = "${e.javaClass}\n${e.localizedMessage}"
+                _photos.value = listOf()
             }
         }
     }
